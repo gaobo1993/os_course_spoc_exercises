@@ -5,7 +5,7 @@
 
 using namespace std;
 
-char memory[128][32];
+char memory[128*32];
 
 void readmemory() {
     string s1, s2;
@@ -14,7 +14,7 @@ void readmemory() {
         for (int j=0; j<32; j++) {
             int temp;
             cin >> hex >> temp;
-            memory[i][j] = char(temp);
+            memory[(i<<5)+j] = char(temp);
         }
     }
 }
@@ -22,10 +22,10 @@ int PDBR = 0x220;
 char getmemory(int addr) {
     int page = (addr & 0x00000fe0) >> 5; // 第6到第12位, 2^7 = 128
     int pos = (addr & 0x0000001f); // 第1到第5位, 2^5 = 32
-    return memory[page][pos];
+    return memory[(page<<5)+pos];
 }
 void transfer(int va) {
-    int pd = (va & 0x00000c00) >> 10; // 第11到第12位
+    int pd = (va & 0x00007c00) >> 10; // 第11到第15位，*注意物理空间虽然是4K(2^12), 但虚拟内存空间是32K(2^15)
     int pteOffset = (va & 0x000003e0) >> 5; // 第6到第10位
     int pageOfffset = (va & 0x0000001f); // 第1到第5位
 
@@ -33,7 +33,7 @@ void transfer(int va) {
     int pde_v = pde >> 7;
     int pde_c = pde & 0x0000007f;
 
-    int pte = memory[pde_c][pteOffset];
+    int pte = memory[(pde_c<<5)+pteOffset];
     int pte_v = pte >> 7;
     int pte_c = pte & 0x0000007f;
 

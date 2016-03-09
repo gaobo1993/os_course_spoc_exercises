@@ -87,12 +87,63 @@ Virtual Address 7268:
       --> Translates to Physical Address 0xca8 --> Value: 16
 ```
 
+Answer:
+```
+Virtual Address 0x6c74:
+  --> pde index:0x1b  pde contents:(valid ffffffff, pfn 0x20)
+     --> pte index:0x03 pte contents:(valid ffffffff, pfn 0x61)
+       --> Translate to Physical Address 0xc34 --> Value:0x06
+
+Virtual Address 0x6b22:
+  --> pde index:0x1a  pde contents:(valid ffffffff, pfn 0x52)
+     --> pte index:0x19 pte contents:(valid ffffffff, pfn 0x47)
+       --> Translate to Physical Address 0x8e2 --> Value:0x1a
+
+Virtual Address 0x03df:
+  --> pde index:0x00  pde contents:(valid ffffffff, pfn 0x5a)
+     --> pte index:0x1e pte contents:(valid ffffffff, pfn 0x05)
+       --> Translate to Physical Address 0xbf --> Value:0x0f
+
+Virtual Address 0x69dc:
+  --> pde index:0x1a  pde contents:(valid ffffffff, pfn 0x52)
+     --> pte index:0x0e pte contents:(valid 0, pfn 0x7f)
+        --> Fault (page table entry not valid)
+
+Virtual Address 0x317a:
+  --> pde index:0x0c  pde contents:(valid ffffffff, pfn 0x18)
+     --> pte index:0x0b pte contents:(valid ffffffff, pfn 0x35)
+       --> Translate to Physical Address 0x6ba --> Value:0x1e
+
+Virtual Address 0x4546:
+  --> pde index:0x11  pde contents:(valid ffffffff, pfn 0x21)
+     --> pte index:0x0a pte contents:(valid 0, pfn 0x7f)
+        --> Fault (page table entry not valid)
+
+Virtual Address 0x2c03:
+  --> pde index:0x0b  pde contents:(valid ffffffff, pfn 0x44)
+     --> pte index:0x00 pte contents:(valid ffffffff, pfn 0x57)
+       --> Translate to Physical Address 0xae3 --> Value:0x16
+
+Virtual Address 0x7fd7:
+  --> pde index:0x1f  pde contents:(valid ffffffff, pfn 0x12)
+     --> pte index:0x1e pte contents:(valid 0, pfn 0x7f)
+        --> Fault (page table entry not valid)
+
+Virtual Address 0x390e:
+  --> pde index:0x0e  pde contents:(valid 0, pfn 0x7f)
+      --> Fault (page directory entry not valid)
+
+Virtual Address 0x748b:
+  --> pde index:0x1d  pde contents:(valid ffffffff, pfn 0x00)
+     --> pte index:0x04 pte contents:(valid 0, pfn 0x7f)
+        --> Fault (page table entry not valid)
+```
 
 
 （3）请基于你对原理课二级页表的理解，并参考Lab2建页表的过程，设计一个应用程序（可基于python, ruby, C, C++，LISP等）可模拟实现(2)题中描述的抽象OS，可正确完成二级页表转换。
 
 
-[代码](https://github.com/gaobo1993/os_course_spoc_exercises/blob/master/all/03-2-spoc-page_trans.cpp)
+> [代码](https://github.com/gaobo1993/os_course_spoc_exercises/blob/master/all/03-2-spoc-page_trans.cpp)
 
 
 （4）假设你有一台支持[反置页表](http://en.wikipedia.org/wiki/Page_table#Inverted_page_table)的机器，请问你如何设计操作系统支持这种类型计算机？请给出设计方案。
