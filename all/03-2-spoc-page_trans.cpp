@@ -57,7 +57,7 @@ void transfer(int va) {
 }
 
 int main() {
-    freopen("input", "r", stdin);
+    freopen("03-2-spoc-input.txt", "r", stdin);
     readmemory();
     string s1, s2;
     int vaddr;
