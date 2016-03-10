@@ -20,9 +20,7 @@ void readmemory() {
 }
 int PDBR = 0x220;
 char getmemory(int addr) {
-    int page = (addr & 0x00000fe0) >> 5; // 第6到第12位, 2^7 = 128
-    int pos = (addr & 0x0000001f); // 第1到第5位, 2^5 = 32
-    return memory[(page<<5)+pos];
+    return memory[addr & 0xfff];
 }
 void transfer(int va) {
     int pd = (va & 0x00007c00) >> 10; // 第11到第15位，*注意物理空间虽然是4K(2^12), 但虚拟内存空间是32K(2^15)
