@@ -7,8 +7,8 @@ using namespace std;
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
 
-BYTE page[256][32];
-BYTE disk[256][32];
+BYTE page[128][32];
+BYTE disk[128][32];
 
 UINT pdbr;
 
