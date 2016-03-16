@@ -18,6 +18,12 @@ BYTE getmemory(UINT addr) {
     return page[inx][pos];
 }
 
+BYTE getdisk(UINT addr) {
+    UINT inx = (addr & 0x00000fe0) >> 5;
+    UINT pos = (addr & 0x0000001f);
+    return disk[inx][pos];
+}
+
 void transfer(UINT va) {
     UINT pd = (va & 0x00007c00) >> 10;
     BYTE pde = getmemory(pdbr+pd);
@@ -37,7 +43,7 @@ void transfer(UINT va) {
     UINT page_offset = (va & 0x0000001f);
     UINT phyaddr = (pte_c << 5 )+ page_offset;
     if (pte_v == 0) { //to disk address
-        UINT value = disk[pte_c][page_offset];
+        UINT value = getdisk(phyaddr);
         printf("      --> To Disk Sector Address 0x%x -->Value: 0x%02x\n", phyaddr, value);
     } else { //to physical address
         UINT value = getmemory(phyaddr);
