@@ -8,6 +8,45 @@ NOTICE
 - 有"easy"标记的题很容易实现，鼓励实现。
 - 有"midd"标记的题是一般水平，鼓励实现。
 
+## 与视频相关思考题
+
+### 6.1	非连续内存分配的需求背景
+ 1. 为什么要设计非连续内存分配机制？
+ 1. 非连续内存分配中内存分块大小有哪些可能的选择？大小与大小是否可变
+ 1. 为什么在大块时要设计大小可变，而在小块时要设计成固定大小？小块时的固定大小可以提供多种选择吗？
+
+### 6.2	段式存储管理
+ 1. 什么是段、段基址和段内偏移？
+ 1. 段式存储管理机制的地址转换流程是什么？为什么在段式存储管理中，各段的存储位置可以不连续？这种做法有什么好处和麻烦？
+
+### 6.3	页式存储管理
+ 1. 什么是页（page）、帧（frame）、页表（page table）、存储管理单元（MMU）、快表（TLB, Translation Lookaside Buffer）和高速缓存（cache）？
+ 1. 页式存储管理机制的地址转换流程是什么？为什么在页式存储管理中，各段的存储位置可以不连续？这种做法有什么好处和麻烦？
+
+ > 多次存储访问
+
+### 6.4	页表概述
+ 1. 每个页表项有些什么内容？有哪些标志位？它们起什么作用？
+ 1. 页表大小受哪些因素影响？
+
+ >  页大小、地址空间大小、进程数目
+
+### 6.5	快表和多级页表
+ 1. 快表（TLB）与高速缓存（cache）有什么不同？
+ 1. 为什么快表中查找物理地址的速度非常快？它是如何实现的？为什么它的的容量很小？
+ 1. 什么是多级页表？多级页表中的地址转换流程是什么？多组页面有什么好处和麻烦？
+
+### 6.6	反置页表
+ 1. 页寄存器机制的地址转换流程是什么？
+ 1. 反置页表机制的地址转换流程是什么？
+ 1. 反置页表项有些什么内容？
+
+ >  PID、逻辑页号、标志位
+
+### 6.7	段页式存储管理
+ 1. 段页式存储管理机制的地址转换流程是什么？这种做法有什么好处和麻烦？
+ 1. 如何实现基于段式存储管理的内存共享？
+ 1. 如何实现基于页式存储管理的内存共享？
 
 ## 个人思考题
 ---
@@ -58,19 +97,19 @@ PT6..0:页表的物理基址>>5
 ```
 在[物理内存模拟数据文件](./03-2-spoc-testdata.md)中，给出了4KB物理内存空间的值，请回答下列虚地址是否有合法对应的物理内存，请给出对应的pde index, pde contents, pte index, pte contents。
 ```
-Virtual Address 6c74
-Virtual Address 6b22
-Virtual Address 03df
-Virtual Address 69dc
-Virtual Address 317a
-Virtual Address 4546
-Virtual Address 2c03
-Virtual Address 7fd7
-Virtual Address 390e
-Virtual Address 748b
+1) Virtual Address 6c74
+   Virtual Address 6b22
+2) Virtual Address 03df
+   Virtual Address 69dc
+3) Virtual Address 317a
+   Virtual Address 4546
+4) Virtual Address 2c03
+   Virtual Address 7fd7
+5) Virtual Address 390e
+   Virtual Address 748b
 ```
 
-比如答案可以如下表示：
+比如答案可以如下表示： (注意：下面的结果是错的，你需要关注的是如何表示)
 ```
 Virtual Address 7570:
   --> pde index:0x1d  pde contents:(valid 1, pfn 0x33)
@@ -140,7 +179,7 @@ Virtual Address 0x748b:
 ```
 
 
-（3）请基于你对原理课二级页表的理解，并参考Lab2建页表的过程，设计一个应用程序（可基于python, ruby, C, C++，LISP等）可模拟实现(2)题中描述的抽象OS，可正确完成二级页表转换。
+（3）请基于你对原理课二级页表的理解，并参考Lab2建页表的过程，设计一个应用程序（可基于python、ruby、C、C++、LISP、JavaScript等）可模拟实现(2)题中描述的抽象OS，可正确完成二级页表转换。
 
 
 > [代码](https://github.com/gaobo1993/os_course_spoc_exercises/blob/master/all/03-2-spoc-page_trans.cpp)
@@ -155,4 +194,14 @@ Virtual Address 0x748b:
 
 阅读64bit IBM Powerpc CPU架构是如何实现[反置页表](http://en.wikipedia.org/wiki/Page_table#Inverted_page_table)，给出分析报告。
 
+<<<<<<< HEAD
 ---
+=======
+--- 
+
+
+## interactive　understand VM
+
+- [Virtual Memory with 256 Bytes of RAM](http://blog.robertelder.org/virtual-memory-with-256-bytes-of-ram/)
+
+>>>>>>> 112b7b503888acac3b14e202cc645a0652893659

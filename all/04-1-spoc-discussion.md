@@ -8,6 +8,57 @@ NOTICE
 - 有"easy"标记的题很容易实现，鼓励实现。
 - 有"midd"标记的题是一般水平，鼓励实现。
 
+提前准备
+
+- 完成lec8的视频学习和提交对应的在线练习
+- git pull uco
+re_os_lab, v9_cpu, os_course_spoc_exercises 　in github repos。这样可以在本机上完成课堂练习。
+- 理解如何实现建立页表，给用户态建立页表，在用户态使用虚地址，产生各自也访问错误的基本应对
+
+## 视频相关思考题
+### 8.1 虚拟存储的需求背景
+
+ 1. 寄存器、高速缓存、内存、外存的访问特征？
+  * 位置、是否有软件参与访问、访问频率
+
+ 1. 在你写程序时遇到过内存不够的情况吗？尝试过什么解决方法？
+
+### 8.2 覆盖和交换
+
+ 1. 什么是覆盖技术？使用覆盖技术的程序开发者的主要工作是什么？
+
+ 1. 什么是交换技术？覆盖与交换有什么不同？
+
+ 1. 如何分析内核模块间的依赖关系？
+
+ 1. 如何内核模块间的函数调用列表？
+
+### 8.3 局部性原理
+
+ 1. 什么是时间局部性、空间局部性和分支局部性？
+
+ 1. 如何提高程序执行时的局部性特征？
+
+ 1. 排序算法的局部性特征？
+  * 参考：[九大排序算法再总结](http://blog.csdn.net/xiazdong/article/details/8462393)
+
+### 8.4 虚拟存储概念
+
+ 1. 什么是虚拟存储？它与覆盖和交换的区别是什么？它有什么好处和挑战？
+
+
+### 8.5 虚拟页式存储
+
+ 1. 什么是虚拟页式存储？缺页中断处理的功能是什么？
+
+ 1. 为了支持虚拟页式存储的实现，页表项有什么修改？
+
+ 2. 页式存储和虚拟页式存储的区别是什么？
+
+### 8.6 缺页异常
+
+ 1. 缺页异常的处理流程？
+
 
 ## 个人思考题
 
@@ -70,14 +121,16 @@ PT6..0:页表的物理基址>>5
 
 在[物理内存模拟数据文件](./04-1-spoc-memdiskdata.md)中，给出了4KB物理内存空间和4KBdisk空间的值，PDBR的值。
 
-请回答下列虚地址是否有合法对应的物理内存，请给出对应的pde index, pde contents, pte index, pte contents，the value of addr in phy page OR disk sector。
+请手工计算后回答下列虚地址是否有合法对应的物理内存，请给出对应的pde index, pde contents, pte index, pte contents，the value of addr in phy page OR disk sector。
 ```
-Virtual Address 6653:
-Virtual Address 1c13:
-Virtual Address 6890:
-Virtual Address 0af6:
-Virtual Address 1e6f:
+1) Virtual Address 6653:
+2) Virtual Address 1c13:
+3) Virtual Address 6890:
+4) Virtual Address 0af6:
+5) Virtual Address 1e6f:
 ```
+
+请写出一个translation程序（可基于python、ruby、C、C++、LISP、JavaScript等），输入是一个虚拟地址，依据[物理内存模拟数据文件](./04-1-spoc-memdiskdata.md)自动计算出对应的pde index, pde contents, pte index, pte contents，the value of addr in phy page OR disk sector。
 
 **提示:**
 ```
@@ -125,3 +178,15 @@ Virtual Address 1e6f(0 001_11 10_011 0_1111):
 
 (2)在X86-32虚拟页式存储系统中，假定第一级页表的起始地址是0xE8A3 B000，进程地址空间只有第一级页表的4KB在内存。请问这4KB的虚拟地址是多少？它对应的第一级页表项和第二级页表项的物理地址是多少？页表项的内容是什么？
 
+## v9-cpu相关
+
+
+[challenge]在v9-cpu上，设定物理内存为64MB。在os.c,os2.c,os4.c,os5的基础上实现os6.c，可体现基本虚拟内存管理机制，内核空间的映射关系： kernel_virt_addr=0xc00000000+phy_addr，内核空间大小为64MB，虚拟空间范围为0xc0000000--x0xc4000000, 物理空间范围为0x00000000--x0x04000000；用户空间的映射关系：user_virt_addr=0x40000000+usr_phy_addr，用户空间可用大小为2MB，虚拟空间范围为0x40000000--0x40200000，物理空间范围为0x02000000--x0x02200000，但只建立低地址的1MB的用户空间页表映射。可参考v9-cpu git repo的testing分支中的os.c和mem.h。修改代码为os5.c
+
+- (1)在建立页表后，进入用户态，能够在用户态访问基于用户空间的映射关系
+- (2)在用户态和内核态产生各种也访问的错误，并能够通过中断服务例程进行信息提示
+- (3)内核通过中断服务例程在感知到用户态访问高地址的空间，且没有超过0x40200000时，内核动态建立页表，确保用户态程序可以正确运行
+
+
+
+如果一个用户态进程访问一个合法用户地址，产生内存访问异常后，v9-cpu会把产生异常的pc存在哪里？中断服务例程应该如何设计，可以返回到用户态产生错误的地址再次执行?
