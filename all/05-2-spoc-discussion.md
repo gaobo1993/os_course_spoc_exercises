@@ -27,6 +27,15 @@ run_link、list_link、hash_link
 1. 加载进程后，新进程进入就绪状态，它开始执行时的第一条指令的位置，在elf中保存在什么地方？在加载后，保存在什么地方？
 2. 第一个用户进程执行的代码在哪里？它是什么时候加载到内存中的？
 
+```
+一个用户进程执行的代码：
+    真正的用户代码在/user中，这个目录下放着ucore所有的用户态代码。
+
+
+加载到内存的时候：
+    对于lab5~lab7，由于这时候还没有文件系统，将会把代码直接放着内核的最后，在加载内核的时候一起放到内存中，这是这段代码进入内存的时候。在proc.c:load_icode仅仅引用这个地址进行可执行文件的解读，并真正将其加载到进程中。
+    对于lab8，在proc.c: user_main中，这是内核中的2号进程，由init_main创建。这个进程会调用do_exec，在do_exec中调用的load_icode的时候，通过文件系统直接加载到进程中。
+```
 ### 12.4 进程等待与退出
 
 1. 试分析wait()和exit()的结果放在什么地方？exit()是在什么时候放进去的？wait()在什么地方取到出的？
@@ -38,7 +47,7 @@ run_link、list_link、hash_link
 
 (1) (spoc)设计一个简化的进程管理子系统，可以管理并调度如下简化进程.给出了[参考代码](https://github.com/chyyuu/ucore_lab/blob/master/related_info/lab5/process-cpuio-homework.py)，请理解代码，并完成＂YOUR CODE"部分的内容．　可２个人一组
 
-### 进程的状态 
+### 进程的状态
 ```
  - RUNNING - 进程正在使用CPU
  - READY   - 进程可使用CPU
@@ -48,7 +57,7 @@ run_link、list_link、hash_link
 
 ### 进程的行为
 ```
- - 使用CPU, 
+ - 使用CPU,
  - 发出YIELD请求,放弃使用CPU
  - 发出I/O操作请求,放弃使用CPU
 ```
@@ -68,13 +77,13 @@ PROC_PC = 'pc_'
 PROC_ID = 'pid_'
 PROC_STATE = 'proc_state_'
 ```
- - 当前进程 curr_proc 
+ - 当前进程 curr_proc
  - 进程列表：proc_info是就绪进程的队列（list），
  - 在命令行（如下所示）需要说明每进程的行为特征：（１）使用CPU ;(2)等待I/O
 ```
    -l PROCESS_LIST, --processlist= X1:Y1,X2:Y2,...
-   X 是进程的执行指令数; 
-   Ｙ是执行yield指令（进程放弃CPU,进入READY状态）的比例(0..100) 
+   X 是进程的执行指令数;
+   Ｙ是执行yield指令（进程放弃CPU,进入READY状态）的比例(0..100)
    Ｚ是执行I/O请求指令（进程放弃CPU,进入WAIT状态）的比例(0..100)
 ```
  - 进程切换行为：系统决定何时(when)切换进程:进程结束或进程发出yield请求
@@ -90,7 +99,7 @@ instruction_to_execute = self.proc_info[self.curr_proc][PROC_CODE].pop(0)
  - 调度函数：next_proc
 
 ### 执行实例
-   
+
 #### 例1
 ```
 $./process-simulation.py  -l 5:30:30,5:40:30 -c
@@ -111,17 +120,17 @@ Process 1
 
 Important behaviors:
   System will switch when the current process is FINISHED or ISSUES AN YIELD or IO
-Time     PID: 0     PID: 1        CPU        IOs 
+Time     PID: 0     PID: 1        CPU        IOs
   1      RUN:io      READY          1            
-  2     WAITING    RUN:yld          1          1 
-  3     WAITING     RUN:io          1          1 
-  4     WAITING    WAITING                     2 
-  5     WAITING    WAITING                     2 
-  6*     RUN:io    WAITING          1          1 
-  7     WAITING    WAITING                     2 
-  8*    WAITING    RUN:yld          1          1 
-  9     WAITING    RUN:yld          1          1 
- 10     WAITING    RUN:yld          1          1 
+  2     WAITING    RUN:yld          1          1
+  3     WAITING     RUN:io          1          1
+  4     WAITING    WAITING                     2
+  5     WAITING    WAITING                     2
+  6*     RUN:io    WAITING          1          1
+  7     WAITING    WAITING                     2
+  8*    WAITING    RUN:yld          1          1
+  9     WAITING    RUN:yld          1          1
+ 10     WAITING    RUN:yld          1          1
  11*    RUN:yld       DONE          1            
  12     RUN:cpu       DONE          1            
  13     RUN:yld       DONE          1            
