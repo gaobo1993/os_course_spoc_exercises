@@ -208,6 +208,7 @@ proc_run(struct proc_struct *proc) {
         struct proc_struct *prev = current, *next = proc;
         local_intr_save(intr_flag);
         {
+			cprintf("proc_run: switch context from %s(pid:%d) to %s(pid:%d)...\n", prev->name, prev->pid, next->name, next->pid);
             current = proc;
             load_esp0(next->kstack + KSTACKSIZE);
             lcr3(next->cr3);
@@ -222,6 +223,7 @@ proc_run(struct proc_struct *proc) {
 //       after switch_to, the current proc will execute here.
 static void
 forkret(void) {
+	cprintf("forkret: process %s(pid:%d) cross from Ring 0 to Ring 3.\n", current->name, current->pid);
     forkrets(current->tf);
 }
 
@@ -453,6 +455,7 @@ do_exit(int error_code) {
     if (current == initproc) {
         panic("initproc exit.\n");
     }
+    cprintf("do_exit name:%s, pid:%d\n", current->name, current->pid);
     
     struct mm_struct *mm = current->mm;
     if (mm != NULL) {
@@ -659,6 +662,7 @@ do_execve(const char *name, size_t len, unsigned char *binary, size_t size) {
         len = PROC_NAME_LEN;
     }
 
+    cprintf("do_execve: %s\n", name);
     char local_name[PROC_NAME_LEN + 1];
     memset(local_name, 0, sizeof(local_name));
     memcpy(local_name, name, len);
@@ -696,6 +700,7 @@ do_yield(void) {
 // NOTE: only after do_wait function, all resources of the child proces are free.
 int
 do_wait(int pid, int *code_store) {
+    cprintf("Enter do_wait pid:%d\n", pid);
     struct mm_struct *mm = current->mm;
     if (code_store != NULL) {
         if (!user_mem_check(mm, (uintptr_t)code_store, sizeof(int), 1)) {
@@ -726,6 +731,7 @@ repeat:
         }
     }
     if (haskid) {
+        cprintf("do_wait: change to SLEEPING name: %s, pid:%d\n", current->name, current->pid);
         current->state = PROC_SLEEPING;
         current->wait_state = WT_CHILD;
         schedule();
@@ -806,6 +812,7 @@ kernel_execve(const char *name, unsigned char *binary, size_t size) {
 // user_main - kernel thread used to exec a user program
 static int
 user_main(void *arg) {
+    cprintf("====Enter user_main\n");
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else

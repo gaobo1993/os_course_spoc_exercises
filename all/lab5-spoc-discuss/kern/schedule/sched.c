@@ -7,6 +7,7 @@
 void
 wakeup_proc(struct proc_struct *proc) {
     assert(proc->state != PROC_ZOMBIE);
+	cprintf("process %d wakeup in schedule\n", proc->pid);
     bool intr_flag;
     local_intr_save(intr_flag);
     {
@@ -44,9 +45,9 @@ schedule(void) {
         }
         next->runs ++;
         if (next != current) {
+			cprintf("process %d switch to run\n", next->pid);
             proc_run(next);
         }
     }
     local_intr_restore(intr_flag);
 }
-
