@@ -1,0 +1,34 @@
+ARG policy MLFQ
+ARG jobs 3
+ARG maxlen 10
+ARG seed 0
+
+Here is the job list, with the run time of each job:
+  Job 0 ( length = 9 prior = 3 stride = 0 passnum = 2)
+  Job 1 ( length = 5 prior = 1 stride = 0 passnum = 6)
+  Job 2 ( length = 6 prior = 2 stride = 0 passnum = 3)
+
+
+** Solutions **
+
+Execution trace:
+  [ time   0 ] Run job   0 for 3.00 secs
+  [ time   3 ] Run job   0 for 3.00 secs
+  [ time   6 ] Run job   0 for 3.00 secs
+  [ time   9 ] Run job   0 for 3.00 secs ( DONE at 12.00 )
+  [ time  12 ] Run job   1 for 2.00 secs
+  [ time  14 ] Run job   1 for 2.00 secs
+  [ time  16 ] Run job   1 for 2.00 secs ( DONE at 18.00 )
+  [ time  18 ] Run job   2 for 1.00 secs
+  [ time  19 ] Run job   2 for 1.00 secs
+  [ time  20 ] Run job   2 for 1.00 secs
+  [ time  21 ] Run job   2 for 1.00 secs
+  [ time  22 ] Run job   2 for 1.00 secs
+  [ time  23 ] Run job   2 for 1.00 secs ( DONE at 24.00 )
+
+Final statistics:
+  Job   0 -- Response: 0.00  Turnaround 12.00  Wait 0.00
+  Job   1 -- Response: 12.00  Turnaround 18.00  Wait 12.00
+  Job   2 -- Response: 18.00  Turnaround 24.00  Wait 18.00
+
+  Average -- Response: 30.00  Turnaround 54.00  Wait 30.00
