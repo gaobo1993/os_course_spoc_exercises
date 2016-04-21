@@ -65,6 +65,7 @@ wakeup_proc(struct proc_struct *proc) {
             proc->state = PROC_RUNNABLE;
             proc->wait_state = 0;
             if (proc != current) {
+                cprintf("Wake up process pid = %d and push in the queue\n",proc->pid);
                 sched_class_enqueue(proc);
             }
         }
@@ -83,12 +84,15 @@ schedule(void) {
     {
         current->need_resched = 0;
         if (current->state == PROC_RUNNABLE) {
+            cprintf("Timer finished for process pid = %d and push in the queue\n",current->pid);
             sched_class_enqueue(current);
         }
         if ((next = sched_class_pick_next()) != NULL) {
+            cprintf("Picks process pid = %d to run and pop from the queue\n",next->pid);
             sched_class_dequeue(next);
         }
         if (next == NULL) {
+            cprintf("No runnable process.\n");
             next = idleproc;
         }
         next->runs ++;
@@ -99,3 +103,79 @@ schedule(void) {
     local_intr_restore(intr_flag);
 }
 
+// add timer to timer_list
+void
+add_timer(timer_t *timer) {
+    bool intr_flag;
+    local_intr_save(intr_flag);
+    {
+        assert(timer->expires > 0 && timer->proc != NULL);
+        assert(list_empty(&(timer->timer_link)));
+        list_entry_t *le = list_next(&timer_list);
+        while (le != &timer_list) {
+            timer_t *next = le2timer(le, timer_link);
+            if (timer->expires < next->expires) {
+                next->expires -= timer->expires;
+                break;
+            }
+            timer->expires -= next->expires;
+            le = list_next(le);
+        }
+        list_add_before(le, &(timer->timer_link));
+    }
+    local_intr_restore(intr_flag);
+}
+
+// del timer from timer_list
+void
+del_timer(timer_t *timer) {
+    bool intr_flag;
+    local_intr_save(intr_flag);
+    {
+        if (!list_empty(&(timer->timer_link))) {
+            if (timer->expires != 0) {
+                list_entry_t *le = list_next(&(timer->timer_link));
+                if (le != &timer_list) {
+                    timer_t *next = le2timer(le, timer_link);
+                    next->expires += timer->expires;
+                }
+            }
+            list_del_init(&(timer->timer_link));
+        }
+    }
+    local_intr_restore(intr_flag);
+}
+
+// call scheduler to update tick related info, and check the timer is expired? If expired, then wakup proc
+void
+run_timer_list(void) {
+    bool intr_flag;
+    local_intr_save(intr_flag);
+    {
+        list_entry_t *le = list_next(&timer_list);
+        if (le != &timer_list) {
+            timer_t *timer = le2timer(le, timer_link);
+            assert(timer->expires != 0);
+            timer->expires --;
+            while (timer->expires == 0) {
+                le = list_next(le);
+                struct proc_struct *proc = timer->proc;
+                if (proc->wait_state != 0) {
+                    assert(proc->wait_state & WT_INTERRUPTED);
+                }
+                else {
+                    warn("process %d's wait_state == 0.\n", proc->pid);
+                }
+                cprintf("process pid = %d wait finished.",proc->pid);
+                wakeup_proc(proc);
+                del_timer(timer);
+                if (le == &timer_list) {
+                    break;
+                }
+                timer = le2timer(le, timer_link);
+            }
+        }
+        sched_class_proc_tick(current);
+    }
+    local_intr_restore(intr_flag);
+}
