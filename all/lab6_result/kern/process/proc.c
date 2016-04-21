@@ -471,7 +471,7 @@ do_exit(int error_code) {
         current->mm = NULL;
     }
 
-	cprintf("proc do_exit() use schedule ,proc is %d\n",current->pid);
+	cprintf("proc %d do_exit use schedule\n",current->pid);
     current->state = PROC_ZOMBIE;
     current->exit_code = error_code;
 
@@ -736,7 +736,7 @@ repeat:
     if (haskid) {
         current->state = PROC_SLEEPING;
         current->wait_state = WT_CHILD;
-		cprintf("proc do_wait() use schedule,proc is %d\n",current->pid);
+		cprintf("proc %d do_wait schedule\n",current->pid);
         schedule();
         if (current->flags & PF_EXITING) {
             do_exit(-E_KILLED);
@@ -835,7 +835,7 @@ init_main(void *arg) {
     }
 
     while (do_wait(0, NULL) == 0) {
-		cprintf("main() schedule\n");
+		cprintf("proc init_main schedule\n");
         schedule();
     }
 
