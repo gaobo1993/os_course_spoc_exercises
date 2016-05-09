@@ -72,23 +72,22 @@ class Bankers(object):
         # YOUR CODE, 2012012139, 2012011383
         #check END here
 
-        a = self.allocated
-        ret = True
+        allDone = True
         for j in range(len(self.allocated)):
             if self.finished[j] == True:
                 continue
-            ret = False
+            allDone = False
             flag = True
-            for i in range(len(a[j])):
+            for i in range(len(self.need[j])):
                 if self.need[j][i] > self.avaliable[i]:
                     flag = False
                     break
             if flag == True:
-                return True
-
-
-        return ret
-        pass
+                return j
+        if allDone:
+            return len(self.allocated)
+        else:
+            return -1
 
     def print_matrixes(self):
         print "_____________________________________________"
@@ -106,53 +105,30 @@ class Bankers(object):
         self.avaliable = self.CalcAvaliable()
 
     def Execute(self):
-        i = 0
-        # get all permutation of processes
-        perm = itertools.permutations(range(procnum), procnum)
-        permArray = np.asarray(list(perm))
-
-        for arr in permArray:
-            for i in arr:
-                if self.finished[i] == False:
-                    print "Executing..."
-                    print "Request: "
-                    print self.need[i]
-                    #check if less avaliable than Request
-                    if self.ExecuteProcess(i):
-                        print "Dispatching Done..."
-
-                        self.print_matrixes()
-
-                        print "-----Releasing Process------"
-
-                        self.ReleasingProcess(i)
-
-                        self.print_matrixes()
-
-                        #check if at least one request can be done after previous process done. not check whole sequances.
-                        #if every element of Requests can't accepted after previous process done, this mean it is not safe state
-                        if not (self.TempSafeCheckAfterRelease()):
-                            print "SAFE STATE: NOT SAFE - There are no sequances can avoid Deadlock"
-                            return False
-                        processes.append(i)
-                    else:
-                        print "HOLD: not enough Resource"
-
-                if i == len(self.allocated)-1:
-                    i = 0
-                else:
-                    i += 1
-
-                check = True
-                for k in range(0,len(self.allocated)):
-                    if self.finished[k] == False:
-                        check = False
-                        break
-                if check == True:
-                    return True
-                    break
-        #every permutation of processes is false
-        return False
+        procnum = len(self.max)
+        idx = 0
+        while 1:
+            # Pick one valid process
+            idx = self.TempSafeCheckAfterRelease()
+            # if there is no valid process and the program is not done
+            if idx == -1:
+                print "SAFE STATE: NOT SAFE - There are no sequances can avoid Deadlock"
+                return False
+            # if the program is done
+            if idx == procnum:
+                return True
+            # Execute
+            print "Executing..."
+            print "Request: "
+            print self.need[idx]
+            #check if less avaliable than Request
+            if self.ExecuteProcess(idx):
+                print "Dispatching Done..."
+                self.print_matrixes()
+                print "-----Releasing Process------"
+                self.ReleasingProcess(idx)
+                self.print_matrixes()
+                processes.append(idx)
 
 def getmax():
     res = []
