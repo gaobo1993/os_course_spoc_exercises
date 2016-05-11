@@ -265,7 +265,7 @@ class fs:
         return 0
 
     def createLink(self, target, newfile, parent):
-    # YOUR CODE, 2012011367
+    # YOUR CODE, 2012012139
         # find info about parent
         # is there room in the parent directory?
         # if the newfile was already in parent dir?
@@ -312,7 +312,7 @@ class fs:
         return lnum
 
     def createFile(self, parent, newfile, ftype):
-    # YOUR CODE, 2012011367
+    # YOUR CODE, 2012012139
         # find info about parent
         # is there room in the parent directory?
         # have to make sure file name is unique
@@ -357,7 +357,7 @@ class fs:
         curSize = self.inodes[inum].getSize()
         dprint('writeFile: inum:%d cursize:%d refcnt:%d' % (inum, curSize, self.inodes[inum].getRefCnt()))
 
-    # YOUR CODE, 2012011367
+    # YOUR CODE, 2012012139
         # file is full?
         # no data blocks left
         # write file data
