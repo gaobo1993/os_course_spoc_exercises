@@ -127,7 +127,7 @@ class inode:
         self.setAll(ftype, addr, refCnt)
 
     def setAll(self, ftype, addr, refCnt):
-        assert(ftype == 'd' or ftype == 'f' or ftype == 'free' or ftype == 'link')
+        assert(ftype == 'd' or ftype == 'f' or ftype == 'free')
         self.ftype  = ftype
         self.addr   = addr
         self.refCnt = refCnt
@@ -244,25 +244,27 @@ class fs:
             print 'unlink("%s");' % tfile
 
         inum = self.nameToInum[tfile]
-        if self.inodes[inum].getRefCnt()==1:
-            self.dataFree(self.inodes[inum].getAddr())
-            self.inodeFree(inum)
-        else:
-            self.inodes[inum].decRefCnt()
-
-
-        num=self.nameToInum[self.getParent(tfile)]
-        self.inodes[num].decRefCnt()
-        self.data[num].delDirEntry(tfile)
-
-    # YOUR CODE, YOUR ID
+    # YOUR CODE, 2012012139
         # IF inode.refcnt ==1, THEN free data blocks first, then free inode, ELSE dec indoe.refcnt
         # remove from parent directory: delete from parent inum, delete from parent addr
     # DONE
-
         # finally, remove from files list
+        relatedInode = self.inodes[inum]
+        if relatedInode.getRefCnt() == 1:
+            self.dataFree(relatedInode.getAddr())
+            self.inodeFree(inum)
+            self.nameToInum.pop(tfile)
+        else:
+            relatedInode.decRefCnt()
+        parentName = self.getParent(tfile)
+        fileName = tfile[len(tfile) - 1]
+        parentInode = self.inodes[self.nameToInum[parentName]]
+        parentInode.decRefCnt()
+        parentBlock = self.data[parentInode.getAddr()]
+        parentBlock.delDirEntry(fileName)
         self.files.remove(tfile)
         return 0
+
 
     def createLink(self, target, newfile, parent):
     # YOUR CODE, 2012012139
@@ -274,38 +276,36 @@ class fs:
         # now add to directory
     # DONE
         if parent not in self.dirs:
-            print "!!%s does not exist" %parent
+            print "createLink: %s does not exist" %parent
             return -1
         ip = self.nameToInum[parent]
         if self.data[ip].getFreeEntries == 0:
-            print "!!no free space in %s" %parent
+            print "createLink: no free space in %s" %parent
             return -1
         if not target in self.nameToInum:
-            print "!!%s does not exist" %target
+            print "createLink: %s does not exist" %target
             return -1
         tinum = self.nameToInum[target]
         if self.data[ip].dirEntryExists(newfile):
-            print "!!%s already exists in %s" %newfile,parent
+            print "createLink: %s already exists in %s" %newfile,parent
         else:
             self.data[ip].addDirEntry(newfile, tinum)
 
-        #inum = self.nameToInum[target]
         self.inodes[ip].incRefCnt()
         self.inodes[tinum].incRefCnt()
-        #self.data[ip].addDirEntry(newfile, inum)
 
         return tinum
 
     def createSoftLink(self, target, newfile, parent):
         if parent not in self.dirs:
-            print "!!%s does not exist" %parent
+            print "createSoftLink: %s does not exist" %parent
             return -1
         ip = self.nameToInum[parent]
         if self.data[ip].getFreeEntries == 0:
-            print "!!no free space in %s" %parent
+            print "createSoftLink: no free space in %s" %parent
             return -1
         if not target in self.nameToInum:
-            print "!!%s does not exist" %target
+            print "createSoftLink: %s does not exist" %target
             return -1
         lnum = self.createFile(parent, newfile, 'link')
         self.writeFile(newfile, target)
@@ -323,14 +323,14 @@ class fs:
         # and add to directory of parent
     # DONE
         if parent not in self.dirs:
-            print "!!% does not exist" %parent
+            print "createFile: %s does not exist" %parent
             return -1
         ip = self.nameToInum[parent]
         if self.data[ip].getFreeEntries == 0:
-            print "!!no free space in %s" %parent
+            print "createFile: no free space in %s" %parent
             return -1
         if newfile in self.files:
-            print "!!not an unique file name"
+            print "createFile: not an unique file name"
             return -1
         inum = self.inodeAlloc()
         if ftype == 'd':
@@ -343,10 +343,8 @@ class fs:
             self.inodes[inum].setAll(ftype, iaddr, 2)
             self.data[iaddr].addDirEntry(".", inum)
             self.data[iaddr].addDirEntry("..", ip)
-           # self.dirs.append(newfile)
         else:
             self.inodes[inum].setAll(ftype, iaddr, 1)
-           # self.files.append(newfile)
         self.nameToInum[newfile] = inum
         self.data[ip].addDirEntry(newfile, inum)
         self.inodes[ip].incRefCnt()
@@ -362,16 +360,16 @@ class fs:
         # no data blocks left
         # write file data
     # DONE
-        if curSize== 0:
-            iaddr = self.dataAlloc()
-            if iaddr == -1:
-                print "!!no data blocks left"
-                return -1
-            self.inodes[inum].setAddr(iaddr)
-            self.data[iaddr].setType('f')
+        if curSize == 0:
+            qw_dataAddr = self.dataAlloc()
+            if qw_dataAddr != -1:
+                self.inodes[inum].setAddr(qw_dataAddr)
+                self.data[qw_dataAddr].setType('f')
+                self.data[qw_dataAddr].addData(data)
         else:
-            iaddr = self.inodes[inum].getAddr()
-        self.data[iaddr].addData(data)
+            print 'writeFile: no space to write append\n'
+            return -1
+
         if printOps:
             print 'fd=open("%s", O_WRONLY|O_APPEND); write(fd, buf, BLOCKSIZE); close(fd);' % tfile
         return 0
@@ -401,6 +399,32 @@ class fs:
             fullName = parent + '/' + nfile
 
         dprint('try createLink(%s %s %s)' % (target, nfile, parent))
+        inum = self.createLink(target, nfile, parent)
+        if inum >= 0:
+            self.files.append(fullName)
+            self.nameToInum[fullName] = inum
+            if printOps:
+                print 'link("%s", "%s");' % (target, fullName)
+            return 0
+        return -1
+
+    def doSoftLink(self):
+        dprint('doLink')
+        if len(self.files) == 0:
+            return -1
+        parent = self.dirs[int(random.random() * len(self.dirs))]
+        nfile = self.makeName()
+
+        # pick random target
+        target = self.files[int(random.random() * len(self.files))]
+
+        # get full name of newfile
+        if parent == '/':
+            fullName = parent + nfile
+        else:
+            fullName = parent + '/' + nfile
+
+        dprint('try createSoftLink(%s %s %s)' % (target, nfile, parent))
         inum = self.createSoftLink(target, nfile, parent)
         if inum >= 0:
             self.files.append(fullName)
@@ -474,8 +498,8 @@ class fs:
                     rc = self.doDelete()
                     dprint('doDelete rc:%d' % rc)
                 elif r < 0.7:
-                    rc = self.doLink()
-                    dprint('doLink rc:%d' % rc)
+                    rc = self.doSoftLink()
+                    dprint('doSoftLink rc:%d' % rc)
                 else:
                     if random.random() < 0.75:
                         rc = self.doCreate('f')
