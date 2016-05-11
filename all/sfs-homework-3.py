@@ -127,7 +127,7 @@ class inode:
         self.setAll(ftype, addr, refCnt)
 
     def setAll(self, ftype, addr, refCnt):
-        assert(ftype == 'd' or ftype == 'f' or ftype == 'free')
+        assert(ftype == 'd' or ftype == 'f' or ftype == 'free' or ftype == 'link')
         self.ftype  = ftype
         self.addr   = addr
         self.refCnt = refCnt
@@ -409,7 +409,7 @@ class fs:
         return -1
 
     def doSoftLink(self):
-        dprint('doLink')
+        dprint('doSoftLink')
         if len(self.files) == 0:
             return -1
         parent = self.dirs[int(random.random() * len(self.dirs))]
