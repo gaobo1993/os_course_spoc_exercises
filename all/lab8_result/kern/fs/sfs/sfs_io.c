@@ -18,9 +18,13 @@
  */
 static int
 sfs_rwblock_nolock(struct sfs_fs *sfs, void *buf, uint32_t blkno, bool write, bool check) {
+    cprintf("           sfs_rwblock_nolock begin\n");
     assert((blkno != 0 || !check) && blkno < sfs->super.blocks);
+    cprintf("           sfs_rwblock_nolock iobuf_init\n");
     struct iobuf __iob, *iob = iobuf_init(&__iob, buf, SFS_BLKSIZE, blkno * SFS_BLKSIZE);
-    return dop_io(sfs->dev, iob, write);
+    int ret = dop_io(sfs->dev, iob, write);
+    cprintf("           sfs_rwblock_nolock end\n");
+    return ret;
 }
 
 /* sfs_rwblock - Basic block-level I/O routine for Rd/Wr N disk blocks ,
@@ -33,6 +37,7 @@ sfs_rwblock_nolock(struct sfs_fs *sfs, void *buf, uint32_t blkno, bool write, bo
  */
 static int
 sfs_rwblock(struct sfs_fs *sfs, void *buf, uint32_t blkno, uint32_t nblks, bool write) {
+    cprintf("           sfs_rwblock begin\n");
     int ret = 0;
     lock_sfs_io(sfs);
     {
@@ -45,6 +50,7 @@ sfs_rwblock(struct sfs_fs *sfs, void *buf, uint32_t blkno, uint32_t nblks, bool 
         }
     }
     unlock_sfs_io(sfs);
+    cprintf("           sfs_rwblock end\n");
     return ret;
 }
 
@@ -57,7 +63,10 @@ sfs_rwblock(struct sfs_fs *sfs, void *buf, uint32_t blkno, uint32_t nblks, bool 
  */
 int
 sfs_rblock(struct sfs_fs *sfs, void *buf, uint32_t blkno, uint32_t nblks) {
-    return sfs_rwblock(sfs, buf, blkno, nblks, 0);
+    cprintf("           sfs_rblock begin\n");
+    int ret = sfs_rwblock(sfs, buf, blkno, nblks, 0);
+    cprintf("           sfs_rblock end\n");
+    return ret;
 }
 
 /* sfs_wblock - The Wrap of sfs_rwblock function for Wr N disk blocks ,
@@ -82,6 +91,7 @@ sfs_wblock(struct sfs_fs *sfs, void *buf, uint32_t blkno, uint32_t nblks) {
  */
 int
 sfs_rbuf(struct sfs_fs *sfs, void *buf, size_t len, uint32_t blkno, off_t offset) {
+    cprintf("           sfs_rbuf begin\n");
     assert(offset >= 0 && offset < SFS_BLKSIZE && offset + len <= SFS_BLKSIZE);
     int ret;
     lock_sfs_io(sfs);
@@ -91,6 +101,7 @@ sfs_rbuf(struct sfs_fs *sfs, void *buf, size_t len, uint32_t blkno, off_t offset
         }
     }
     unlock_sfs_io(sfs);
+    cprintf("           sfs_rbuf end\n");
     return ret;
 }
 
@@ -164,4 +175,3 @@ sfs_clear_block(struct sfs_fs *sfs, uint32_t blkno, uint32_t nblks) {
     unlock_sfs_io(sfs);
     return ret;
 }
-

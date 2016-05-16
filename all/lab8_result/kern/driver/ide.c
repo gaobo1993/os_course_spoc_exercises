@@ -156,6 +156,7 @@ ide_device_size(unsigned short ideno) {
 
 int
 ide_read_secs(unsigned short ideno, uint32_t secno, void *dst, size_t nsecs) {
+    cprintf("                   ide_read_secs begin\n");
     assert(nsecs <= MAX_NSECS && VALID_IDE(ideno));
     assert(secno < MAX_DISK_NSECS && secno + nsecs <= MAX_DISK_NSECS);
     unsigned short iobase = IO_BASE(ideno), ioctrl = IO_CTRL(ideno);
@@ -172,6 +173,7 @@ ide_read_secs(unsigned short ideno, uint32_t secno, void *dst, size_t nsecs) {
     outb(iobase + ISA_COMMAND, IDE_CMD_READ);
 
     int ret = 0;
+    cprintf("                   ide_read_secs call insl to read from disk\n");
     for (; nsecs > 0; nsecs --, dst += SECTSIZE) {
         if ((ret = ide_wait_ready(iobase, 1)) != 0) {
             goto out;
@@ -180,6 +182,7 @@ ide_read_secs(unsigned short ideno, uint32_t secno, void *dst, size_t nsecs) {
     }
 
 out:
+    cprintf("                   ide_read_secs end\n");
     return ret;
 }
 
@@ -211,4 +214,3 @@ ide_write_secs(unsigned short ideno, uint32_t secno, const void *src, size_t nse
 out:
     return ret;
 }
-

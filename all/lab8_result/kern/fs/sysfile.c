@@ -59,6 +59,7 @@ sysfile_close(int fd) {
 /* sysfile_read - read file */
 int
 sysfile_read(int fd, void *base, size_t len) {
+    cprintf("sysfile_read begin\n");
     struct mm_struct *mm = current->mm;
     if (len == 0) {
         return 0;
@@ -97,6 +98,7 @@ sysfile_read(int fd, void *base, size_t len) {
     }
 
 out:
+    cprintf("sysfile_read end\n");
     kfree(buffer);
     if (copied != 0) {
         return copied;
@@ -314,4 +316,3 @@ int
 sysfile_mkfifo(const char *__name, uint32_t open_flags) {
     return -E_UNIMP;
 }
-

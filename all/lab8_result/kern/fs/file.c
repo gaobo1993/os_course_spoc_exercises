@@ -211,6 +211,7 @@ file_close(int fd) {
 // read file
 int
 file_read(int fd, void *base, size_t len, size_t *copied_store) {
+    cprintf("file_read begin\n");
     int ret;
     struct file *file;
     *copied_store = 0;
@@ -221,6 +222,7 @@ file_read(int fd, void *base, size_t len, size_t *copied_store) {
         return -E_INVAL;
     }
     fd_array_acquire(file);
+    cprintf("file_read file acquired\n");
 
     struct iobuf __iob, *iob = iobuf_init(&__iob, base, len, file->pos);
     ret = vop_read(file->node, iob);
@@ -231,6 +233,8 @@ file_read(int fd, void *base, size_t len, size_t *copied_store) {
     }
     *copied_store = copied;
     fd_array_release(file);
+    cprintf("file_read file released\n");
+    cprintf("file_read end\n");
     return ret;
 }
 
@@ -352,5 +356,3 @@ file_dup(int fd1, int fd2) {
     fd_array_dup(file2, file1);
     return file2->fd;
 }
-
-
